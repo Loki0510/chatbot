@@ -217,9 +217,9 @@ if uploaded_audio is not None:
 
     try:
         sound = AudioSegment.from_file(original_audio_path, format=audio_ext)
-sound = sound.set_frame_rate(16000).set_channels(1).set_sample_width(2)
-sound.export(wav_audio_path, format="wav")  # remove ffmpeg dependency for Streamlit Cloud
-os.remove(original_audio_path)
+        sound = sound.set_frame_rate(16000).set_channels(1).set_sample_width(2)
+        sound.export(wav_audio_path, format="wav")  # remove ffmpeg dependency for Streamlit Cloud
+        os.remove(original_audio_path)
 
         with sr.AudioFile(wav_audio_path) as source:
             audio_data = recognizer.record(source)
