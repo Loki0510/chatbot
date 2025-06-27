@@ -39,8 +39,6 @@ def speak(text):
         except RuntimeError:
             pass
     threading.Thread(target=_speak).start()
-
-
 def correct_spelling(text):
     return str(TextBlob(text).correct())
 
