@@ -1,0 +1,44 @@
+# ----------------------
+# Python Bytecode & Caches
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Environment Variables / Secrets
+.env
+.streamlit/secrets.toml
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Logs
+*.log
+
+# Python egg info
+*.egg-info/
+dist/
+build/
+
+# Pip wheels
+*.whl
+
+# Misc
+*.bak
+*.swp

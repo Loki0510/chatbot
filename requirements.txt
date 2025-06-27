@@ -1,0 +1,17 @@
+streamlit
+openai
+boto3
+pyttsx3
+SpeechRecognition
+pyaudio ; platform_system == "Windows"
+deep-translator
+textblob
+plotly
+scikit-learn
+pandas
+numpy
+beautifulsoup4
+requests
+langchain
+langchain-openai
+langchain-community
