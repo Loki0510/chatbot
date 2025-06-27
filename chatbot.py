@@ -18,6 +18,7 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.text_splitter import CharacterTextSplitter
+from pydub import AudioSegment
 
 # === Load from Streamlit Cloud Secrets ===
 os.environ["AWS_ACCESS_KEY_ID"] = st.secrets["AWS_ACCESS_KEY_ID"]
@@ -143,7 +144,7 @@ col1, col2 = st.columns([6, 1])
 with col1:
     user_input = st.text_input("Type your message")
 
-enable_tts = st.checkbox("🔊 Enable Voice Response", value=False)
+enable_tts = st.checkbox("�udd0a Enable Voice Response", value=False)
 
 if user_input:
     translated = GoogleTranslator(source='auto', target='en').translate(user_input)
@@ -206,14 +207,22 @@ uploaded_audio = st.file_uploader("Upload an audio file", type=["wav", "mp3", "m
 
 if uploaded_audio is not None:
     recognizer = sr.Recognizer()
-    audio_ext = uploaded_audio.name.split('.')[-1]
-    audio_path = f"temp_audio.{audio_ext}"
+    audio_ext = uploaded_audio.name.split('.')[-1].lower()
+    original_audio_path = f"temp_audio.{audio_ext}"
+    wav_audio_path = "converted_audio.wav"
 
-    with open(audio_path, "wb") as f:
+    with open(original_audio_path, "wb") as f:
         f.write(uploaded_audio.read())
 
     try:
-        with sr.AudioFile(audio_path) as source:
+        if audio_ext != "wav":
+            sound = AudioSegment.from_file(original_audio_path, format=audio_ext)
+            sound.export(wav_audio_path, format="wav")
+            os.remove(original_audio_path)
+        else:
+            wav_audio_path = original_audio_path
+
+        with sr.AudioFile(wav_audio_path) as source:
             audio_data = recognizer.record(source)
         voice_text = recognizer.recognize_google(audio_data)
         st.success(f"✅ Recognized Voice Text: `{voice_text}`")
@@ -232,7 +241,6 @@ if uploaded_audio is not None:
 
         st.markdown("### 🧠 Voice File Query Response (OpenAI):")
         st.info(final_response)
-
         if enable_tts:
             speak(final_response)
 
@@ -253,7 +261,6 @@ if uploaded_audio is not None:
 
                 with st.expander(f"🧠 {model} Response"):
                     final_text = ""
-
                     if isinstance(result, dict):
                         if "outputs" in result and isinstance(result["outputs"], list):
                             final_text = result["outputs"][0].get("text", "").strip()
@@ -276,8 +283,11 @@ if uploaded_audio is not None:
         st.error("❌ Could not understand the audio.")
     except sr.RequestError as e:
         st.error(f"❌ Error with speech recognition service: {e}")
+    except Exception as conv_err:
+        st.error(f"❌ Audio conversion/transcription error: {conv_err}")
     finally:
         try:
-            os.remove(audio_path)
+            if os.path.exists(wav_audio_path):
+                os.remove(wav_audio_path)
         except Exception as cleanup_err:
             st.warning(f"⚠️ Could not delete temp file: {cleanup_err}")
