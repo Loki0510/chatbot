@@ -3,8 +3,8 @@ import streamlit as st
 import boto3
 import json
 import speech_recognition as sr
-import threading
 import pyttsx3
+import threading
 from deep_translator import GoogleTranslator
 from textblob import TextBlob
 import plotly.express as px
@@ -39,6 +39,7 @@ def speak(text):
         except RuntimeError:
             pass
     threading.Thread(target=_speak).start()
+
 def correct_spelling(text):
     return str(TextBlob(text).correct())
 
@@ -197,3 +198,86 @@ if user_input:
 
         except Exception as e:
             st.error(f"{model} failed: {e}")
+
+# === Voice File Upload ===
+st.markdown("---")
+st.markdown("### 🎵 Upload a Voice File (WAV/MP3/M4A)")
+uploaded_audio = st.file_uploader("Upload an audio file", type=["wav", "mp3", "m4a"])
+
+if uploaded_audio is not None:
+    recognizer = sr.Recognizer()
+    audio_ext = uploaded_audio.name.split('.')[-1]
+    audio_path = f"temp_audio.{audio_ext}"
+
+    with open(audio_path, "wb") as f:
+        f.write(uploaded_audio.read())
+
+    try:
+        with sr.AudioFile(audio_path) as source:
+            audio_data = recognizer.record(source)
+        voice_text = recognizer.recognize_google(audio_data)
+        st.success(f"✅ Recognized Voice Text: `{voice_text}`")
+
+        translated = GoogleTranslator(source='auto', target='en').translate(voice_text)
+        corrected = correct_spelling(translated) if len(translated.split()) <= 2 else translated
+        corrected = corrected[:1600]
+
+        if retriever:
+            rag_response = qa_chain.invoke({"query": corrected})
+            rag_text = rag_response.get("result", "") if isinstance(rag_response, dict) else rag_response
+            fallback = any(p in rag_text.lower() for p in ["no info", "not found", "don't know"])
+            final_response = rag_text if rag_text.strip() and not fallback else get_chatgpt_response(corrected).content
+        else:
+            final_response = get_chatgpt_response(corrected).content
+
+        st.markdown("### 🧠 Voice File Query Response (OpenAI):")
+        st.info(final_response)
+
+        if enable_tts:
+            speak(final_response)
+
+        st.markdown("## 🔍 Bedrock Model Responses (Voice File)")
+        for model in selected_models:
+            try:
+                model_id = bedrock_models[model]
+                bedrock_prompt = f"Context: {rag_text}\n\nUser Query: {corrected}" if retriever else corrected
+                body = format_prompt(model_id, bedrock_prompt)
+
+                response = client.invoke_model(
+                    modelId=model_id,
+                    body=body.encode('utf-8'),
+                    accept="application/json",
+                    contentType="application/json"
+                )
+                result = json.loads(response['body'].read())
+
+                with st.expander(f"🧠 {model} Response"):
+                    final_text = ""
+
+                    if isinstance(result, dict):
+                        if "outputs" in result and isinstance(result["outputs"], list):
+                            final_text = result["outputs"][0].get("text", "").strip()
+                        elif "generation" in result:
+                            final_text = result["generation"].strip()
+                        elif "output" in result:
+                            final_text = result["output"].strip()
+                        else:
+                            final_text = json.dumps(result, indent=2)
+                    else:
+                        final_text = str(result)
+
+                    final_text = final_text.strip().rstrip(".1234567890")
+                    st.info(final_text)
+
+            except Exception as e:
+                st.error(f"{model} failed: {e}")
+
+    except sr.UnknownValueError:
+        st.error("❌ Could not understand the audio.")
+    except sr.RequestError as e:
+        st.error(f"❌ Error with speech recognition service: {e}")
+    finally:
+        try:
+            os.remove(audio_path)
+        except Exception as cleanup_err:
+            st.warning(f"⚠️ Could not delete temp file: {cleanup_err}")
