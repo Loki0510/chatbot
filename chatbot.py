@@ -14,12 +14,17 @@ import numpy as np
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.text_splitter import CharacterTextSplitter
 
-# === Load from environment variables (EC2 recommended) ===
+try:
+    from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+    from langchain_community.vectorstores import FAISS
+    from langchain.chains import RetrievalQA
+    from langchain.text_splitter import CharacterTextSplitter
+except ImportError:
+    st.error("Missing LangChain or FAISS. Ensure 'langchain', 'langchain-community', 'langchain-openai', and 'faiss-cpu' are installed.")
+    st.stop()
+
+# === Load from environment variables ===
 os.environ["AWS_ACCESS_KEY_ID"] = os.getenv("AWS_ACCESS_KEY_ID", "")
 os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("AWS_SECRET_ACCESS_KEY", "")
 os.environ["AWS_DEFAULT_REGION"] = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
@@ -39,7 +44,6 @@ def speak(text):
         except RuntimeError:
             pass
     threading.Thread(target=_speak).start()
-
 
 def correct_spelling(text):
     return str(TextBlob(text).correct())
@@ -98,23 +102,11 @@ def plot_vector_embeddings_interactive(texts, embeddings):
 
 def format_prompt(model_id, prompt):
     if model_id.startswith("anthropic."):
-        return json.dumps({
-            "messages": [{"role": "user", "content": prompt}],
-            "anthropic_version": "bedrock-2023-05-31",
-        })
+        return json.dumps({"messages": [{"role": "user", "content": prompt}], "anthropic_version": "bedrock-2023-05-31"})
     elif model_id.startswith("meta."):
-        return json.dumps({
-            "prompt": prompt,
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "max_gen_len": 512
-        })
+        return json.dumps({"prompt": prompt, "temperature": 0.7, "top_p": 0.9, "max_gen_len": 512})
     else:
-        return json.dumps({
-            "prompt": prompt,
-            "temperature": 0.7,
-            "max_tokens": 512
-        })
+        return json.dumps({"prompt": prompt, "temperature": 0.7, "max_tokens": 512})
 
 client = boto3.client("bedrock-runtime", region_name="us-east-1")
 bedrock_models = {
@@ -145,8 +137,6 @@ with col1:
     user_input = st.text_input("Type your message or click mic...")
 
 enable_tts = st.checkbox("🔊 Enable Voice Response", value=False)
-#if use_voice:
-    #user_input = get_voice_input()
 
 if user_input:
     translated = GoogleTranslator(source='auto', target='en').translate(user_input)
