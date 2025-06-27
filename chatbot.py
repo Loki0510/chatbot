@@ -19,11 +19,11 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.text_splitter import CharacterTextSplitter
 
-# === Load from Streamlit Cloud Secrets ===
-os.environ["AWS_ACCESS_KEY_ID"] = st.secrets["AWS_ACCESS_KEY_ID"]
-os.environ["AWS_SECRET_ACCESS_KEY"] = st.secrets["AWS_SECRET_ACCESS_KEY"]
-os.environ["AWS_DEFAULT_REGION"] = st.secrets["AWS_DEFAULT_REGION"]
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+# === Load from environment variables (EC2 recommended) ===
+os.environ["AWS_ACCESS_KEY_ID"] = os.getenv("AWS_ACCESS_KEY_ID", "")
+os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+os.environ["AWS_DEFAULT_REGION"] = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY", "")
 
 st.set_page_config(page_title="🧠 Voice + RAG + Bedrock", layout="wide")
 st.title("🧠 Voice + RAG + Bedrock Model Comparator")
