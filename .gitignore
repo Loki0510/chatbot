@@ -9,9 +9,6 @@ __pycache__/
 # Jupyter Notebook Checkpoints
 .ipynb_checkpoints/
 
-# Environment Variables / Secrets
-.env
-.streamlit/secrets.toml
 
 # OS Generated Files
 .DS_Store
