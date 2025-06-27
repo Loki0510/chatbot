@@ -203,7 +203,6 @@ if user_input:
 # === Voice File Upload ===
 st.markdown("---")
 st.markdown("### 🎵 Upload a Voice File (WAV/MP3/M4A)")
-st.warning("⚠️ Only WAV format is supported on Streamlit Cloud. For MP3/M4A support, use EC2 or local machine.")
 uploaded_audio = st.file_uploader("Upload a WAV file", type=["wav"])
 
 if uploaded_audio is not None:
