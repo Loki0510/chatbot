@@ -144,7 +144,7 @@ col1, col2 = st.columns([6, 1])
 with col1:
     user_input = st.text_input("Type your message")
 
-enable_tts = st.checkbox("�udd0a Enable Voice Response", value=False)
+enable_tts = st.checkbox("🔊 Enable Voice Response", value=False)
 
 if user_input:
     translated = GoogleTranslator(source='auto', target='en').translate(user_input)
@@ -215,12 +215,10 @@ if uploaded_audio is not None:
         f.write(uploaded_audio.read())
 
     try:
-        if audio_ext != "wav":
-            sound = AudioSegment.from_file(original_audio_path, format=audio_ext)
-            sound.export(wav_audio_path, format="wav")
-            os.remove(original_audio_path)
-        else:
-            wav_audio_path = original_audio_path
+        sound = AudioSegment.from_file(original_audio_path, format=audio_ext)
+        sound = sound.set_frame_rate(16000).set_channels(1).set_sample_width(2)
+        sound.export(wav_audio_path, format="wav")
+        os.remove(original_audio_path)
 
         with sr.AudioFile(wav_audio_path) as source:
             audio_data = recognizer.record(source)
