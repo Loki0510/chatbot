@@ -203,7 +203,8 @@ if user_input:
 # === Voice File Upload ===
 st.markdown("---")
 st.markdown("### 🎵 Upload a Voice File (WAV/MP3/M4A)")
-uploaded_audio = st.file_uploader("Upload an audio file", type=["wav", "mp3", "m4a"])
+st.warning("⚠️ Only WAV format is supported on Streamlit Cloud. For MP3/M4A support, use EC2 or local machine.")
+uploaded_audio = st.file_uploader("Upload a WAV file", type=["wav"])
 
 if uploaded_audio is not None:
     recognizer = sr.Recognizer()
@@ -216,9 +217,9 @@ if uploaded_audio is not None:
 
     try:
         sound = AudioSegment.from_file(original_audio_path, format=audio_ext)
-        sound = sound.set_frame_rate(16000).set_channels(1).set_sample_width(2)
-        sound.export(wav_audio_path, format="wav", parameters=["-acodec", "pcm_s16le"])
-        os.remove(original_audio_path)
+sound = sound.set_frame_rate(16000).set_channels(1).set_sample_width(2)
+sound.export(wav_audio_path, format="wav")  # remove ffmpeg dependency for Streamlit Cloud
+os.remove(original_audio_path)
 
         with sr.AudioFile(wav_audio_path) as source:
             audio_data = recognizer.record(source)
