@@ -41,16 +41,16 @@ def speak(text):
     threading.Thread(target=_speak).start()
 
 # === Voice Input ===
-def get_voice_input():
+'''def get_voice_input():
     recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("🎙️ Listening...")
+    #with sr.Microphone() as source:
+     #   st.info("🎙️ Listening...")
         audio = recognizer.listen(source)
     try:
         return recognizer.recognize_google(audio)
     except Exception as e:
         st.warning(f"Voice recognition failed: {e}")
-        return ""
+        return ""'''
 
 def correct_spelling(text):
     return str(TextBlob(text).correct())
@@ -158,8 +158,8 @@ with col2:
     use_voice = st.button("🎙️ Voice")
 
 enable_tts = st.checkbox("🔊 Enable Voice Response", value=False)
-if use_voice:
-    user_input = get_voice_input()
+#if use_voice:
+    #user_input = get_voice_input()
 
 if user_input:
     translated = GoogleTranslator(source='auto', target='en').translate(user_input)
