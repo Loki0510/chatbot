@@ -143,8 +143,6 @@ if web_url:
 col1, col2 = st.columns([6, 1])
 with col1:
     user_input = st.text_input("Type your message or click mic...")
-with col2:
-    use_voice = st.button("🎙️ Voice")
 
 enable_tts = st.checkbox("🔊 Enable Voice Response", value=False)
 #if use_voice:
