@@ -24,6 +24,7 @@ env/
 .idea/
 *.sublime-workspace
 *.sublime-project
+.streamlit/secrets.toml
 
 # Logs
 *.log
