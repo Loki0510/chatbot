@@ -40,17 +40,6 @@ def speak(text):
             pass
     threading.Thread(target=_speak).start()
 
-# === Voice Input ===
-'''def get_voice_input():
-    recognizer = sr.Recognizer()
-    #with sr.Microphone() as source:
-     #   st.info("🎙️ Listening...")
-        audio = recognizer.listen(source)
-    try:
-        return recognizer.recognize_google(audio)
-    except Exception as e:
-        st.warning(f"Voice recognition failed: {e}")
-        return ""'''
 
 def correct_spelling(text):
     return str(TextBlob(text).correct())
