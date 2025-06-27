@@ -145,8 +145,6 @@ with col1:
     user_input = st.text_input("Type your message")
 
 enable_tts = st.checkbox("🔊 Enable Voice Response", value=False)
-if use_voice:
-    user_input = get_voice_input()
 
 if user_input:
     translated = GoogleTranslator(source='auto', target='en').translate(user_input)
