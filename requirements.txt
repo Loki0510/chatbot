@@ -1,29 +1,15 @@
-# === Core App and Dashboard ===
 streamlit
-pandas
-numpy
-plotly
-scikit-learn
-
-# === Voice Input / TTS ===
-speechrecognition
+openai
+boto3
 pyttsx3
-pyaudio  # May need extra setup on Linux/EC2
-
-# === Translation and NLP ===
+speechrecognition
 deep-translator
 textblob
-
-# === Web Scraping ===
-requests
+plotly
+scikit-learn
 beautifulsoup4
-
-# === AWS Bedrock and LangChain ===
-boto3
+requests
 langchain
 langchain-community
-langchain-openai
-faiss-cpu  # Vector store backend
-
-# === Optional (for TTS or audio backend fixes) ===
-pywin32; platform_system == "Windows"
+faiss-cpu
+tiktoken
